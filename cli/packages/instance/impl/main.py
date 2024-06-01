@@ -1,5 +1,5 @@
 from base import *
-
+import config
 
 # TODO Consult instance config as we need here at a minimumum: PID (if any), JBoss install path, instances directory path, JBoss config file to use
 class InstanceImpl(Command):

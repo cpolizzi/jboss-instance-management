@@ -1,5 +1,7 @@
 from base import *
 
+import config
+
 
 class ServiceImpl(Command):
     def __init__(

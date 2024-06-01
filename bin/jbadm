@@ -11,11 +11,11 @@ from yaml.loader import SafeLoader
 
 #=====
 # Behavior abstractions.
-class Paths:
+class PathBootstrap:
     """
-    Local storage paths.
+    Path bootstrapper.
     """
-    def home():
+    def home() -> str:
         """
         Determines the absolute path where this script is installed.
         """
@@ -25,7 +25,11 @@ class Paths:
 
 #=====
 # Update the Python search path to resolve our modules before we import anything we need
-sys.path.insert(1, f"{Paths.home()}/cli/packages")
+sys.path.insert(1, f"{PathBootstrap.home()}/cli/packages")
+
+# Ensure that our path module is seeded with the directory path to this script
+import paths
+paths.Paths.home(PathBootstrap.home())
 #-----
 
 
