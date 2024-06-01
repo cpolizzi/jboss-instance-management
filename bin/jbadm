@@ -1,0 +1,85 @@
+#!/usr/bin/python3
+
+import enum
+import platform
+import subprocess
+import sys
+import os
+import yaml
+import json
+from yaml.loader import SafeLoader
+
+#=====
+# Behavior abstractions.
+class Paths:
+    """
+    Local storage paths.
+    """
+    def home():
+        """
+        Determines the absolute path where this script is installed.
+        """
+        return os.path.realpath(os.path.dirname(os.path.abspath(os.path.dirname(sys.argv[0]))))
+#-----
+
+
+#=====
+# Update the Python search path to resolve our modules before we import anything we need
+sys.path.insert(1, f"{Paths.home()}/cli/packages")
+#-----
+
+
+#=====
+# Our CLI depedencies
+from rich import print as rprint
+from rich.console import Console
+from rich.table import Table
+from typing import Optional
+import typer
+import typer.rich_utils 
+#-----
+
+
+#=====
+# Presentation enhancement
+#
+# By default, the style is "dim" with blue which makes it purple.
+# with a black background this is unreadable.
+typer.rich_utils.STYLE_ERRORS_SUGGESTION = ""
+#-----
+
+
+#=====
+# Ensure both long and short option for help can be used
+app = typer.Typer(
+    context_settings = {
+        "help_option_names": ["--help", "-h"]
+        },
+    rich_markup_mode="rich"
+    )
+#-----
+
+
+#=====
+# Build the CLI
+import instance
+import service
+import expression
+
+app.add_typer(
+    instance.app, name="instance", 
+    help="Instance management",
+    )
+app.add_typer(
+    service.app, name="service", 
+    help="Service management",
+    )
+app.add_typer(
+    expression.app, name="expression", 
+    help="Expression management",
+    )
+#-----
+
+
+if __name__ == "__main__":
+    app()

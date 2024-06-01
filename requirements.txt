@@ -1,0 +1,14 @@
+Pygments
+click
+commonmark
+importlib-metadata
+jsonpath-ng
+rich
+shellingham
+typer
+typing-extensions
+
+munch
+requests
+Jinja2
+PyYAML
