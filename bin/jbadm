@@ -26,6 +26,7 @@ class PathBootstrap:
 #=====
 # Update the Python search path to resolve our modules before we import anything we need
 sys.path.insert(1, f"{PathBootstrap.home()}/cli/packages")
+sys.path.insert(2, f"{PathBootstrap.home()}/lib/packages")
 
 # Ensure that our path module is seeded with the directory path to this script
 import paths
