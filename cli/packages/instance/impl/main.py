@@ -25,9 +25,9 @@ class InstanceImpl(Command):
     @staticmethod
     def list() -> None:
         conf = config.Config().load()
-        print(conf)
-        for instance in conf.instances:
-            print(instance)
+        if conf.instances:
+            for instance in conf.instances:
+                print(instance)
 
 
     # TODO Build properties
