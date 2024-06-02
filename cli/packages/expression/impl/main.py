@@ -13,7 +13,7 @@ class ExpressionImpl(Command):
             self,
             expression: str,
             resolver: str,
-    ):
+    ) -> str:
         command = "standalone.sh"
         args = []
         args.append(f"{self._name}")

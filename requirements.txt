@@ -1,3 +1,4 @@
+# CLI
 Pygments
 click
 commonmark
@@ -8,6 +9,8 @@ shellingham
 typer
 typing-extensions
 
+# Implementation
+jsonschema
 munch
 requests
 Jinja2

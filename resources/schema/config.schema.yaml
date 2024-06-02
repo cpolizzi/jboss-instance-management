@@ -1,0 +1,38 @@
+type: object
+properties:
+    paths:
+        $ref: "#/$defs/Paths"
+    instances:
+        $ref: "#/$defs/Instances"
+required:
+    - paths
+unevaluatedProperties: false
+additionalProperties: false
+
+
+#=====
+# Types
+$defs:
+
+#-----
+# Type: Paths
+    Paths:
+        type: object
+        properties:
+            jboss:
+                type: string
+            instances:
+                type: string
+        required:
+            - jboss
+            - instances
+        unevaluatedProperties: false
+        additionalProperties: false
+
+
+#-----
+# Type: Instances
+    Instances:
+        type: array
+        items:
+            type: string

@@ -1,13 +1,8 @@
 #!/usr/bin/python3
 
-import enum
-import platform
-import subprocess
 import sys
 import os
-import yaml
-import json
-from yaml.loader import SafeLoader
+
 
 #=====
 # Behavior abstractions.

@@ -13,7 +13,7 @@ class ServiceImpl(Command):
 
     def add(
             self,
-    ):
+    ) -> None:
         command = "standalone.sh"
         args = []
         args.append(f"{self._name}")
@@ -23,7 +23,7 @@ class ServiceImpl(Command):
 
     def remove(
             self,
-    ):
+    ) -> None:
         command = "standalone.sh"
         args = []
         args.append(f"{self._name}")

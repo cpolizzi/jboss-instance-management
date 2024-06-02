@@ -11,9 +11,43 @@ import instance.impl
 #=====
 # Build the CLI
 @app.command()
+def add(
+    name: str = typer.Argument(..., help="Instance name"),
+):
+    """
+    Add instance
+    """
+    target = instance.impl.InstanceImpl(name)
+    target.add()
+
+
+@app.command()
+def remove(
+    name: str = typer.Argument(..., help="Instance name"),
+):
+    """
+    Remove instance
+    """
+    target = instance.impl.InstanceImpl(name)
+    target.remove()
+
+
+@app.command()
+def list(
+):
+    """
+    List known instances
+    """
+    instance.impl.InstanceImpl.list()
+
+
+@app.command()
 def start(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    Start instance
+    """
     target = instance.impl.InstanceImpl(name)
     target.start()
 
@@ -22,6 +56,9 @@ def start(
 def stop(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    Stop instance
+    """
     target = instance.impl.InstanceImpl(name)
     target.stop()
 
@@ -30,6 +67,9 @@ def stop(
 def restart(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    Restart instance
+    """
     target = instance.impl.InstanceImpl(name)
     target.restart()
 
@@ -38,6 +78,9 @@ def restart(
 def status(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    Show instance status
+    """
     target = instance.impl.InstanceImpl(name)
     target.status()
 
@@ -46,6 +89,9 @@ def status(
 def kill(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    Forcefully stop an instance
+    """
     target = instance.impl.InstanceImpl(name)
     target.kill()
 
@@ -58,6 +104,9 @@ def cli(
     command: str = typer.Option(None, help="Command to execute"),
     file: str = typer.Option(None, help="File containing commands to execute"),
 ):
+    """
+    Execute commands against an instance
+    """
     target = instance.impl.InstanceImpl(name)
     target.cli(command, file)
 #-----
