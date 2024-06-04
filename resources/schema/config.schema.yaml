@@ -4,8 +4,11 @@ properties:
         $ref: "#/$defs/Paths"
     instances:
         $ref: "#/$defs/Instances"
+    defaults:
+        $ref: "#/$defs/Defaults"
 required:
     - paths
+    - defaults
 unevaluatedProperties: false
 additionalProperties: false
 
@@ -36,3 +39,29 @@ $defs:
         type: array
         items:
             type: string
+
+
+#-----
+# Type: Defaults
+    Defaults:
+        type: object
+        properties:
+            jboss:
+                $ref: "#/$defs/Defaults-JBoss"
+        required:
+            - jboss
+        unevaluatedProperties: false
+        additionalProperties: false
+
+
+#-----
+# Type: Defaults-JBoss
+    Defaults-JBoss:
+        type: object
+        properties:
+            profile:
+                type: string
+        required:
+            - profile
+        unevaluatedProperties: false
+        additionalProperties: false

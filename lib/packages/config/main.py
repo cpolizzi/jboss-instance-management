@@ -6,8 +6,17 @@ import yaml
 import paths
 
 
+# TODO Add to `.paths.pids` for the directory in which PID files should be stored (we need runtime status)
 class Config:
-    paths : dict
+    class Paths:
+        jboss: str
+        instances: str
+
+    class Defaults:
+        class JBoss:
+            profile: str
+
+    paths : Paths
     instances: list
 
     def __init__(
