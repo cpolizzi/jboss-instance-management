@@ -11,7 +11,7 @@ typing-extensions
 
 # Implementation
 jsonschema
-munch
+python-box
 requests
 Jinja2
 PyYAML

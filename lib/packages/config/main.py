@@ -1,5 +1,5 @@
+from box import Box
 from jsonschema import validate
-from munch import DefaultMunch
 import os
 import yaml
 
@@ -7,13 +7,17 @@ import paths
 
 
 class Config:
+    paths : dict
+    instances: list
+
     def __init__(
             self,
+            **entries,
     ):
         """
         Creates an instance.
         """
-        self._config = {}
+        self.__dict__.update(entries)
 
 
     @staticmethod
@@ -32,28 +36,34 @@ class Config:
         return f"{paths.Paths.configs()}/config.yaml"
 
 
-    def load(
-            self,
-    ) -> DefaultMunch:
+    @classmethod
+    def load(cls):
         """
         Loads the configuration, validates it against the configuration schema and returns the result as a dynamic object.
         """
-        result = DefaultMunch()
+        result : Config = None
 
         # Load schema
         with open(Config.schema(), "r") as f:
             schema = yaml.safe_load(f)
 
         # Load configuration and validate against schema
+        conf_data = {}
         try:
             with open(Config.config(), "r") as f:
-                self._config = yaml.safe_load(f)
-            validate(self._config, schema)
+                conf_data = yaml.safe_load(f)
+            validate(conf_data, schema)
         except FileNotFoundError:
-            pass
+            # Config file does not exist
+            conf_data = {
+                "paths": {
+                    "jboss": None,
+                    "instances": None,
+                },
+                "instances": [],
+            }
 
-        # Convert loaded configuration document into an object
-        result = DefaultMunch.fromDict(self._config)
+        result = Config(**Box(conf_data))
 
         return result
     
@@ -65,5 +75,4 @@ class Config:
         Saves the configuration.
         """
         os.makedirs(os.path.dirname(Config.config()), exist_ok = True)
-        with open(Config.config() + ".1", "w") as f:
-            yaml.dump(self._config, f, indent = 4, sort_keys = True, default_flow_style = False)
+        Box(vars(self)).to_yaml(filename = self.config() + ".1", indent = 4, sort_keys = False, default_flow_style = False)

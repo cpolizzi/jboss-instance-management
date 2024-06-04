@@ -13,21 +13,21 @@ class InstanceImpl(Command):
     def add(
             self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
 
     def remove(
         self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
 
     @staticmethod
     def list() -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
         if conf.instances:
             for instance in conf.instances:
-                print(instance)
+                print(f"{instance}")
 
 
     # TODO Build properties
@@ -38,7 +38,7 @@ class InstanceImpl(Command):
     def start(
             self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
         props = self._propertiesForInstance()
         print(props)
@@ -57,7 +57,7 @@ class InstanceImpl(Command):
     def stop(
             self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
 
     # TODO Build properties
@@ -68,7 +68,7 @@ class InstanceImpl(Command):
     def restart(
             self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
 
     # TODO Build properties
@@ -78,7 +78,7 @@ class InstanceImpl(Command):
     def status(
             self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
 
     # TODO Build properties
@@ -89,7 +89,7 @@ class InstanceImpl(Command):
     def kill(
             self,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
 
 
     # TODO Build properties
@@ -100,7 +100,7 @@ class InstanceImpl(Command):
             command: str,
             file: str,
     ) -> None:
-        conf = config.Config().load()
+        conf = config.Config.load()
         pass
 
 

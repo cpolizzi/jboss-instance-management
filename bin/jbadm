@@ -55,7 +55,8 @@ app = typer.Typer(
     context_settings = {
         "help_option_names": ["--help", "-h"]
         },
-    rich_markup_mode="rich"
+    rich_markup_mode = "rich",
+    pretty_exceptions_show_locals = False,
     )
 #-----
 
