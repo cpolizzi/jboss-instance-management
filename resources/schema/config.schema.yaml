@@ -26,9 +26,12 @@ $defs:
                 type: string
             instances:
                 type: string
+            run:
+                type: string
         required:
             - jboss
             - instances
+            - run
         unevaluatedProperties: false
         additionalProperties: false
 

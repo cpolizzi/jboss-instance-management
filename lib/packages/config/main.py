@@ -66,12 +66,13 @@ class Config:
             # Config file does not exist
             conf_data = {
                 "paths": {
-                    "jboss": "",
-                    "instances": "",
+                    "jboss": "/opt/jboss",
+                    "instances": "/opt/app/jboss",
+                    "run": "/var/run/jboss",
                 },
                 "defaults": {
                     "jboss": {
-                        "profile": "",
+                        "profile": "standalone-full.xml",
                     },
                 },
                 "instances": [],

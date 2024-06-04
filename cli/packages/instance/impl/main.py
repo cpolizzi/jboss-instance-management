@@ -2,7 +2,6 @@ from base import *
 import config
 
 
-# TODO Determine how to manage JBoss instance PIDs - single YAML file or in separate PID files?
 class InstanceImpl(Command):
     def __init__(
             self,
