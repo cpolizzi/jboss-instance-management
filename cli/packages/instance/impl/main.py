@@ -29,6 +29,7 @@ class InstanceImpl(Command):
         if conf.instances:
             for instance in conf.instances:
                 print(f"{instance}")
+        conf.save()
 
 
     # TODO Build properties
