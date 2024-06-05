@@ -1,14 +1,22 @@
+import os
+
 from base import *
 import config
+import util
 
 
 class InstanceImpl(Command):
+    _name : str
+    _path : str
+    _profile : str
+    _jboss_properties : util.Properties
+    _jvm_properties : util.Properties
+
     def __init__(
             self,
             name : str,
     ):
         self._name = name
-
 
     def add(
             self,
@@ -30,23 +38,30 @@ class InstanceImpl(Command):
                 print(f"{instance}")
 
 
-    # TODO Build properties
-    # TODO Validate instance exists in config
     # TODO Determine instance state
-    # TODO Start instance
     # TODO Update instance state
+    # TODO Ensure instance start is separated from the TTY and in the background
+    # TODO Build JVM properties
     def start(
             self,
     ) -> None:
+        # Load configuration
         conf = config.Config.load()
 
-        props = self._propertiesForInstance()
-        print(props)
-        command = "standalone.sh"
+        # Validate instance
+        if not self._exists(conf):
+            raise NameError(self._name, f"Instance {self._name} does not exist")
+
+        # Compose JBoss properties
+        self._properties = self._buildJBossProperties(conf = conf)
+
+        # Compose command
+        command = f"{conf.paths.jboss}/bin/standalone.sh"
         args = []
-        args.append(f"{self._name}")
-        return
-        self.execute(command = command, args = args)
+        args.append(self._properties.compose(util.Properties.ComposeForm.CLI))
+
+        # Execute command
+        self.execute(command = command, args = args, debug = True)
 
 
     # TODO Build properties
@@ -104,12 +119,20 @@ class InstanceImpl(Command):
         pass
 
 
-    # TODO Needs to be used outside of this class, so make it available in a better way (maybe a new class?)
-    # TODO Load config and use paths accordingly from that
-    # TODO Validate instance exists in config
-    def _propertiesForInstance(self) -> str:
-       result = {
-            f"jboss.server.base.dir": "/tmp/jboss/instances/{self._name}",
-            f"jboss.server.default.config": "standalone-full.xml",
-       }
+    def _exists(
+            self,
+            conf : config.Config
+    ) -> bool:
+        return self._name in conf.instances and os.path.isdir(f"{conf.paths.instances}/{self._name}")
+
+
+    def _buildJBossProperties(
+            self,
+            conf : config.Config,
+    ) -> util.Properties:
+       result : util.Properties = util.Properties()
+
+       result.add("jboss.server.base.dir", f"{conf.paths.instances}/{self._name}")
+       result.add("jboss.server.default.config", f"{conf.defaults.jboss.profile}")
+
        return result
