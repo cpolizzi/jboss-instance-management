@@ -62,7 +62,7 @@ class InstanceImpl(Command):
             java_opts = java_opts + f"{k}{v} "
         os.environ["JAVA_OPTS"] = java_opts.strip()
 
-        # Compose command
+        # Compose command to execute
         command = f"{conf.paths.jboss}/bin/standalone.sh"
         args = []
         args = args + self._jboss_properties.compose_as_list(util.Properties.ComposeForm.CLI)
@@ -139,8 +139,13 @@ class InstanceImpl(Command):
     ) -> util.Properties:
        result : util.Properties = util.Properties()
 
+       # Calculated defaults controlled by this tool and default configuration
        result.add("jboss.server.base.dir", f"{conf.paths.instances}/{self._name}")
        result.add("jboss.server.default.config", f"{conf.defaults.jboss.profile}")
+
+       # Add additional default properties
+       for k, v in conf.defaults.jboss.properties.items():
+           result.add(k, v)
 
        return result
     

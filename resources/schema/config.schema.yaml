@@ -66,6 +66,22 @@ $defs:
         properties:
             profile:
                 type: string
+            properties:
+                type: object
+                properties:
+                    /:
+                        type: string
+                patternProperties:
+                   ^jboss.([a-z]+)((.[a-z]+)*)$:
+                         type: string
+                not:
+                    anyOf:
+                        - required:
+                            - jboss.server.base.dir
+                        - required:
+                            - jboss.server.default.config
+                unevaluatedProperties: false
+                additionalProperties: false
         required:
             - profile
         unevaluatedProperties: false
