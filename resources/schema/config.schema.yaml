@@ -51,6 +51,8 @@ $defs:
         properties:
             jboss:
                 $ref: "#/$defs/Defaults-JBoss"
+            jvm:
+                $ref: "#/$defs/Defaults-JVM"
         required:
             - jboss
         unevaluatedProperties: false
@@ -68,3 +70,14 @@ $defs:
             - profile
         unevaluatedProperties: false
         additionalProperties: false
+
+
+#-----
+# Type: Defaults-JVM
+    Defaults-JVM:
+        type: object
+        properties:
+            options:
+                type: object
+                properties:
+                    /: {}

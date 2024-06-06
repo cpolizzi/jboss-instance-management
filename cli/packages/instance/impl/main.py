@@ -10,7 +10,7 @@ class InstanceImpl(Command):
     _path : str
     _profile : str
     _jboss_properties : util.Properties
-    _jvm_properties : util.Properties
+    _jvm_options : dict
 
     def __init__(
             self,
@@ -49,16 +49,23 @@ class InstanceImpl(Command):
         conf = config.Config.load()
 
         # Validate instance
-        if not self._exists(conf):
+        if not self.exists(conf):
             raise NameError(self._name, f"Instance {self._name} does not exist")
 
         # Compose JBoss properties
-        self._properties = self._buildJBossProperties(conf = conf)
+        self._jboss_properties = self.composeJBossProperties(conf = conf)
+
+        # Compose JVM options and make available via environment variable
+        self._jvm_options = self.composeJvmOptions(conf = conf)
+        java_opts : str = ""
+        for k, v in self._jvm_options.items():
+            java_opts = java_opts + f"{k}{v} "
+        os.environ["JAVA_OPTS"] = java_opts.strip()
 
         # Compose command
         command = f"{conf.paths.jboss}/bin/standalone.sh"
         args = []
-        args.append(self._properties.compose(util.Properties.ComposeForm.CLI))
+        args = args + self._jboss_properties.compose_as_list(util.Properties.ComposeForm.CLI)
 
         # Execute command
         self.execute(command = command, args = args, debug = True)
@@ -119,14 +126,14 @@ class InstanceImpl(Command):
         pass
 
 
-    def _exists(
+    def exists(
             self,
             conf : config.Config
     ) -> bool:
         return self._name in conf.instances and os.path.isdir(f"{conf.paths.instances}/{self._name}")
 
 
-    def _buildJBossProperties(
+    def composeJBossProperties(
             self,
             conf : config.Config,
     ) -> util.Properties:
@@ -136,3 +143,15 @@ class InstanceImpl(Command):
        result.add("jboss.server.default.config", f"{conf.defaults.jboss.profile}")
 
        return result
+    
+
+    # TODO Merge instance level JVM options
+    def composeJvmOptions(
+            self,
+            conf : config.Config,
+    ) -> dict:
+        result : dict = dict()
+        for k, v in conf.defaults.jvm.options.items():
+            result[k] = v
+
+        return result

@@ -24,17 +24,27 @@ class Properties:
         return self
     
 
-    def compose(
+    def compose_as_string(
             self,
             form : ComposeForm = ComposeForm.FILE,
     ) -> str:
         if form is Properties.ComposeForm.CLI:
-            return self._compose_as_cli()
+            return self._compose_as_cli_string()
         elif form is Properties.ComposeForm.FILE:
-            return self._compose_as_file()
+            return self._compose_as_file_string()
+        
+
+    def compose_as_list(
+            self,
+            form : ComposeForm = ComposeForm.FILE,
+    ) -> list:
+        if form is Properties.ComposeForm.CLI:
+            return self._compose_as_cli_list()
+        elif form is Properties.ComposeForm.FILE:
+            return self._compose_as_file_list()
 
 
-    def _compose_as_cli(
+    def _compose_as_cli_string(
             self,
     ) -> str:
         result : str = ""
@@ -43,7 +53,7 @@ class Properties:
         
         return result.strip()
     
-    def _compose_as_file(
+    def _compose_as_file_string(
             self,
     ) -> str:
         result : str = ""
@@ -51,3 +61,22 @@ class Properties:
             result = result + f"{k}={v}\n"
 
         return result.strip()
+    
+
+    def _compose_as_cli_list(
+            self,
+    ) -> list:
+        result : list = list()
+        for k, v in self._properties.items():
+            result.append(f"-D{k}={v}")
+
+        return result
+    
+    def _compose_as_file_list(
+            self,
+    ) -> list:
+        result : list = list()
+        for k, v in self._properties.items():
+            result.append(f"{k}={v}")
+
+        return result
