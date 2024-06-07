@@ -44,7 +44,7 @@ $defs:
         type: object
         properties:
             jvm:
-                $ref: "#/$defs/Defaults-JVM"
+                $ref: "#/$defs/JVM-Options"
 
 
 #-----
@@ -55,7 +55,7 @@ $defs:
             jboss:
                 $ref: "#/$defs/Defaults-JBoss"
             jvm:
-                $ref: "#/$defs/Defaults-JVM"
+                $ref: "#/$defs/JVM-Options"
         required:
             - jboss
         unevaluatedProperties: false
@@ -69,23 +69,8 @@ $defs:
         properties:
             profile:
                 type: string
-            # TODO extract`properties` inlined type to referencable type `JBoss-Properties`
             properties:
-                type: object
-                properties:
-                    /:
-                        type: string
-                patternProperties:
-                   ^jboss.([a-z]+)((.[a-z]+)*)$:
-                         type: string
-                not:
-                    anyOf:
-                        - required:
-                            - jboss.server.base.dir
-                        - required:
-                            - jboss.server.default.config
-                unevaluatedProperties: false
-                additionalProperties: false
+                $ref: "#/$defs/JBoss-Properties"
         required:
             - profile
         unevaluatedProperties: false
@@ -93,9 +78,28 @@ $defs:
 
 
 #-----
-# Type: Defaults-JVM
-# TODO Change this name to `JVM-Options``
-    Defaults-JVM:
+# Type: JBoss-Properties
+    JBoss-Properties:
+        type: object
+        properties:
+            /:
+                type: string
+        patternProperties:
+            ^jboss.([a-z]+)((.[a-z]+)*)$:
+                type: string
+        not:
+            anyOf:
+                - required:
+                    - jboss.server.base.dir
+                - required:
+                    - jboss.server.default.config
+        unevaluatedProperties: false
+        additionalProperties: false
+
+
+#-----
+# Type: JVM-Options
+    JVM-Options:
         type: object
         properties:
             options:
