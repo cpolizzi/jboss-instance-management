@@ -35,7 +35,7 @@ class InstanceImpl(Command):
         conf = config.Config.load()
         if conf.instances:
             for instance in conf.instances:
-                print(f"{instance}")
+                print(f"{instance.name}")
 
 
     # TODO Determine instance state
@@ -130,7 +130,8 @@ class InstanceImpl(Command):
             self,
             conf : config.Config
     ) -> bool:
-        return self._name in conf.instances and os.path.isdir(f"{conf.paths.instances}/{self._name}")
+        instance = next((x for x in conf.instances if x.name == self._name), None)
+        return instance and os.path.isdir(f"{conf.paths.instances}/{self._name}")
 
 
     def composeJBossProperties(
@@ -139,13 +140,17 @@ class InstanceImpl(Command):
     ) -> util.Properties:
        result : util.Properties = util.Properties()
 
-       # Calculated defaults controlled by this tool and default configuration
+       # Calculated defaults controlled by this tool and default configuration paths
        result.add("jboss.server.base.dir", f"{conf.paths.instances}/{self._name}")
        result.add("jboss.server.default.config", f"{conf.defaults.jboss.profile}")
 
-       # Add additional default properties
-       for k, v in conf.defaults.jboss.properties.items():
-           result.add(k, v)
+       # Add default properties from configuration
+       try:
+           for k, v in conf.defaults.jboss.properties.items():
+               result.add(k, v)
+       except KeyError:
+           pass
+        
 
        return result
     
@@ -156,7 +161,20 @@ class InstanceImpl(Command):
             conf : config.Config,
     ) -> dict:
         result : dict = dict()
-        for k, v in conf.defaults.jvm.options.items():
-            result[k] = v
+
+        # Defaults
+        try:
+            for k, v in conf.defaults.jvm.options.items():
+                result[k] = v
+        except KeyError:
+            pass
+
+        # Instance
+        instance = next((x for x in conf.instances if x.name == self._name), None)
+        try:
+            for k, v in instance.jvm.options.items():
+                result[k] = v
+        except KeyError:
+            pass
 
         return result

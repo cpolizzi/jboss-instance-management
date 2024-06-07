@@ -3,7 +3,9 @@ properties:
     paths:
         $ref: "#/$defs/Paths"
     instances:
-        $ref: "#/$defs/Instances"
+        type: array
+        items:
+            $ref: "#/$defs/Instance"
     defaults:
         $ref: "#/$defs/Defaults"
 required:
@@ -37,11 +39,12 @@ $defs:
 
 
 #-----
-# Type: Instances
-    Instances:
-        type: array
-        items:
-            type: string
+# Type: Instance
+    Instance:
+        type: object
+        properties:
+            jvm:
+                $ref: "#/$defs/Defaults-JVM"
 
 
 #-----
@@ -66,6 +69,7 @@ $defs:
         properties:
             profile:
                 type: string
+            # TODO extract`properties` inlined type to referencable type `JBoss-Properties`
             properties:
                 type: object
                 properties:
@@ -90,6 +94,7 @@ $defs:
 
 #-----
 # Type: Defaults-JVM
+# TODO Change this name to `JVM-Options``
     Defaults-JVM:
         type: object
         properties:
