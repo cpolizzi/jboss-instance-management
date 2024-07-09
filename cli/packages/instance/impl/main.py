@@ -44,9 +44,9 @@ class InstanceImpl(Command):
     # TODO Determine instance state
     # TODO Update instance state
     # TODO Ensure instance start is separated from the TTY and in the background
-    # TODO Build JVM properties
     def start(
             self,
+            background: bool = False,
     ) -> None:
         # Load configuration
         conf = config.Config.load()
@@ -71,7 +71,7 @@ class InstanceImpl(Command):
         args = args + self._jboss_properties.compose_as_list(util.Properties.ComposeForm.CLI)
 
         # Execute command
-        self.execute(command = command, args = args, debug = True)
+        self.execute(command = command, args = args, debug = False, background = background)
 
 
     # TODO Build properties

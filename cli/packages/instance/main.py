@@ -44,12 +44,13 @@ def list(
 @app.command()
 def start(
     name: str = typer.Argument(..., help="Instance name"),
+    background: bool = typer.Option(True, help="Start in the background detached from the TTY"),
 ):
     """
     Start instance
     """
     target = instance.impl.InstanceImpl(name)
-    target.start()
+    target.start(background = background)
 
 
 @app.command()
