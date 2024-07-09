@@ -45,6 +45,8 @@ $defs:
         properties:
             jvm:
                 $ref: "#/$defs/JVM-Options"
+            java:
+                $ref: "#/$defs/JVM-Properties"
 
 
 #-----
@@ -56,6 +58,8 @@ $defs:
                 $ref: "#/$defs/Defaults-JBoss"
             jvm:
                 $ref: "#/$defs/JVM-Options"
+            java:
+                $ref: "#/$defs/JVM-Properties"
         required:
             - jboss
         unevaluatedProperties: false
@@ -103,6 +107,17 @@ $defs:
         type: object
         properties:
             options:
+                type: object
+                properties:
+                    /: {}
+
+
+#-----
+# Type: JVM-Properties
+    JVM-Properties:
+        type: object
+        properties:
+            properties:
                 type: object
                 properties:
                     /: {}

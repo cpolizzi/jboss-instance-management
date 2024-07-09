@@ -136,7 +136,6 @@ class InstanceImpl(Command):
         instance = next((x for x in conf.instances if x.name == self._name), None)
         return instance and os.path.isdir(f"{conf.paths.instances}/{self._name}")
 
-    # TODO Add JBoss properties per instance
     def composeJBossProperties(
             self,
             conf : config.Config,
@@ -147,13 +146,27 @@ class InstanceImpl(Command):
        result.add("jboss.server.base.dir", f"{conf.paths.instances}/{self._name}")
        result.add("jboss.server.default.config", f"{conf.defaults.jboss.profile}")
 
-       # Add default properties from configuration
+       # Add default JBoss specific properties from configuration
        try:
            for k, v in conf.defaults.jboss.properties.items():
                result.add(k, v)
        except KeyError:
            pass
-        
+       
+       # Add default JVM properties from configuration
+       try:
+           for k, v in conf.defaults.java.properties.items():
+               result.add(k, v)
+       except KeyError:
+           pass
+       
+       # Add instance JVM properties from configuration
+       instance = next((x for x in conf.instances if x.name == self._name), None)
+       try:
+           for k, v in instance.java.properties.items():
+               result.add(k, v)
+       except KeyError:
+           pass 
 
        return result
     
@@ -164,14 +177,14 @@ class InstanceImpl(Command):
     ) -> dict:
         result : dict = dict()
 
-        # Defaults
+        # Default options
         try:
             for k, v in conf.defaults.jvm.options.items():
                 result[k] = v
         except KeyError:
             pass
 
-        # Instance
+        # Instance options
         instance = next((x for x in conf.instances if x.name == self._name), None)
         try:
             for k, v in instance.jvm.options.items():
