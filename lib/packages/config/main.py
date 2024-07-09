@@ -7,8 +7,7 @@ import paths
 
 
 # TODO Add to `.paths.pids` for the directory in which PID files should be stored (we need runtime status)
-
-# TODO Add JVM properties per instance
+# TODO Add JBoss properties per instance
 class Config:
     def __init__(
             self,

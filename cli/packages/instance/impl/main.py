@@ -30,6 +30,9 @@ class InstanceImpl(Command):
         conf = config.Config.load()
 
 
+    # TODO Support different output formats: YAML, JSON, table
+    # TODO Warn if instance does not actually exist on the filesystem
+    # TODO Add an option for verbose to show complete configuration?
     @staticmethod
     def list() -> None:
         conf = config.Config.load()
@@ -133,7 +136,7 @@ class InstanceImpl(Command):
         instance = next((x for x in conf.instances if x.name == self._name), None)
         return instance and os.path.isdir(f"{conf.paths.instances}/{self._name}")
 
-
+    # TODO Add JBoss properties per instance
     def composeJBossProperties(
             self,
             conf : config.Config,
@@ -155,7 +158,6 @@ class InstanceImpl(Command):
        return result
     
 
-    # TODO Merge instance level JVM options
     def composeJvmOptions(
             self,
             conf : config.Config,
