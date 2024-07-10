@@ -1,6 +1,8 @@
+from box import Box
 import os
 
 from base import *
+from .state import InstanceStateManager, InstanceState
 import config
 import util
 
@@ -41,9 +43,6 @@ class InstanceImpl(Command):
                 print(f"{instance.name}")
 
 
-    # TODO Determine instance state
-    # TODO Update instance state
-    # TODO Ensure instance start is separated from the TTY and in the background
     def start(
             self,
             background: bool = False,
@@ -51,10 +50,19 @@ class InstanceImpl(Command):
         # Load configuration
         conf = config.Config.load()
 
-        # Validate instance
+        # Validate instance exists
         if not self.exists(conf):
             raise NameError(self._name, f"Instance {self._name} does not exist")
-
+        
+        # Determine current instance state
+        state_manager = InstanceStateManager.load(conf)
+        instance_state : InstanceState
+        if state_manager.is_running(self._name):
+            # Instance is running, nothing more to do
+            instance_state = state_manager.state_for(self._name)
+            print(f"Instance {self._name} is running and has PID {instance_state.pid}")
+            return
+        
         # Compose JBoss properties
         self._jboss_properties = self.composeJBossProperties(conf = conf)
 
@@ -71,7 +79,12 @@ class InstanceImpl(Command):
         args = args + self._jboss_properties.compose_as_list(util.Properties.ComposeForm.CLI)
 
         # Execute command
-        self.execute(command = command, args = args, debug = False, background = background)
+        print(f"Starting instance {self._name}")
+        exec_status = self.execute(command = command, args = args, debug = False, background = background)
+        if background:
+            instance_state = Box(name = self._name, pid = exec_status)
+            state_manager.update(instance_state)
+            state_manager.save(conf)
 
 
     # TODO Build properties
@@ -131,10 +144,11 @@ class InstanceImpl(Command):
 
     def exists(
             self,
-            conf : config.Config
+            conf : config.Config,
     ) -> bool:
         instance = next((x for x in conf.instances if x.name == self._name), None)
         return instance and os.path.isdir(f"{conf.paths.instances}/{self._name}")
+    
 
     def composeJBossProperties(
             self,

@@ -1,0 +1,30 @@
+type: object
+properties:
+    instances:
+        type: array
+        items:
+            $ref: "#/$defs/Instance-State"
+required:
+    - instances
+unevaluatedProperties: false
+additionalProperties: false
+
+
+#=====
+# Types
+$defs:
+
+#-----
+# Type: Instance-State
+    Instance-State:
+        type: object
+        properties:
+            name:
+                type: string
+            pid:
+                type: integer
+        required:
+            - name
+            - pid
+        unevaluatedProperties: false
+        additionalProperties: false

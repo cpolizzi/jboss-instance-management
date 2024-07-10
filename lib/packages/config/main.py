@@ -79,4 +79,4 @@ class Config:
         Saves the configuration.
         """
         os.makedirs(os.path.dirname(Config.config()), exist_ok = True)
-        Box(vars(self)).to_yaml(filename = self.config(), indent = 4, sort_keys = False, default_flow_style = False)
+        Box(vars(self)).to_yaml(filename = self.config(), indent = 2, sort_keys = False, default_flow_style = False)

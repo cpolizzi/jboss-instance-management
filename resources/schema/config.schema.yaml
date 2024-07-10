@@ -40,13 +40,20 @@ $defs:
 
 #-----
 # Type: Instance
+#       TODO `jboss` properties should be here too via type `JBoss-Properties`
     Instance:
         type: object
         properties:
+            name:
+                type: string
             jvm:
                 $ref: "#/$defs/JVM-Options"
             java:
                 $ref: "#/$defs/JVM-Properties"
+        required:
+            - name
+        unevaluatedProperties: false
+        additionalProperties: false
 
 
 #-----
