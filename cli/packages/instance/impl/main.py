@@ -167,15 +167,35 @@ class InstanceImpl(Command):
             print(f"Instance {self._name} is not running")
         
 
-    # TODO Build properties
-    # TODO Validate instance exists in config
-    # TODO Determine instance state
-    # TODO Kill instance
-    # TODO Update instance state
     def kill(
             self,
     ) -> None:
+        # Load configuration
         conf = config.Config.load()
+
+        # Validate instance exists
+        if not self.exists(conf):
+            raise NameError(self._name, f"Instance {self._name} does not exist")
+        
+        # Determine current instance state
+        state_manager = InstanceStateManager.load(conf)
+        instance_state : InstanceState = None
+        proc : psutil.Process = state_manager.is_running(self._name)
+        if proc:
+            # Instance is running, ensure that it a JBoss JVM process
+            instance_state = state_manager.state_for(self._name)
+            print(f"Stopping instance {self._name} with PID {instance_state.pid}")
+            if proc.name() == "java" and len(proc.cmdline()) > 1 and proc.cmdline()[1] == "-D[Standalone]":
+                # Forcefully terminate
+                proc.kill()
+        else:
+            # Instance is not running
+            print(f"Instance {self._name} is not running")
+            instance_state = Box(name = self._name)
+
+        # Remove instance state
+        state_manager.remove(instance_state)
+        state_manager.save(conf)
 
 
     # TODO Build properties
