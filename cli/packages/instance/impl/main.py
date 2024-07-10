@@ -144,7 +144,6 @@ class InstanceImpl(Command):
         self.start(background = True)
 
 
-    # TODO Remove instance state if stale
     def status(
             self,
     ) -> None:
@@ -163,8 +162,11 @@ class InstanceImpl(Command):
             instance_state = state_manager.state_for(self._name)
             print(f"Instance {self._name} is running and has PID {instance_state.pid}")
         else:
-            # Instance is not running
+            # Instance is not running, remove state
             print(f"Instance {self._name} is not running")
+            instance_state = Box(name = self._name)
+            state_manager.remove(instance_state)
+            state_manager.save(conf)
         
 
     def kill(
