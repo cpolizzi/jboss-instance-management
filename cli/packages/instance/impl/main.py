@@ -1,5 +1,7 @@
 from box import Box
 import os
+import psutil
+import time
 
 from base import *
 from .state import InstanceStateManager, InstanceState
@@ -14,6 +16,8 @@ class InstanceImpl(Command):
     _profile : str
     _jboss_properties : util.Properties
     _jvm_options : dict
+
+    TERMINATE_WAIT_TIME = 10
 
     def __init__(
             self,
@@ -47,7 +51,6 @@ class InstanceImpl(Command):
             self,
             background: bool = False,
     ) -> None:
-        #<><> BEGIN boiler plate logic
         # Load configuration
         conf = config.Config.load()
 
@@ -63,7 +66,6 @@ class InstanceImpl(Command):
             instance_state = state_manager.state_for(self._name)
             print(f"Instance {self._name} is already running and has PID {instance_state.pid}")
             return
-        #<><> END boiler plate logic
         
         # Compose JBoss properties
         self._jboss_properties = self.composeJBossProperties(conf = conf)
@@ -82,22 +84,54 @@ class InstanceImpl(Command):
 
         # Execute command
         print(f"Starting instance {self._name}")
-        exec_status = self.execute(command = command, args = args, debug = False, background = background)
+        pid_or_exit_status = self.execute(command = command, args = args, debug = False, background = background)
         if background:
-            instance_state = Box(name = self._name, pid = exec_status)
+            # Obtain PID of JVM which is a child process of the executed command, but we must wait for it to be created
+            # so we have to poll.
+            proc = psutil.Process(pid_or_exit_status)
+            while len(proc.children()) == 0:
+                time.sleep(1)
+
+            instance_state = Box(name = self._name, pid = proc.children()[0].pid)
             state_manager.update(instance_state)
             state_manager.save(conf)
 
 
-    # TODO Build properties
-    # TODO Validate instance exists in config
-    # TODO Determine instance state
-    # TODO Stop instance
-    # TODO Update instance state
     def stop(
             self,
     ) -> None:
+        # Load configuration
         conf = config.Config.load()
+
+        # Validate instance exists
+        if not self.exists(conf):
+            raise NameError(self._name, f"Instance {self._name} does not exist")
+        
+        # Determine current instance state
+        state_manager = InstanceStateManager.load(conf)
+        instance_state : InstanceState = None
+        proc : psutil.Process = state_manager.is_running(self._name)
+        if proc:
+            # Instance is running, ensure that it a JBoss JVM process
+            instance_state = state_manager.state_for(self._name)
+            print(f"Stopping instance {self._name} with PID {instance_state.pid}")
+            if proc.name() == "java" and len(proc.cmdline()) > 1 and proc.cmdline()[1] == "-D[Standalone]":
+                # Gracefully stop and wait for 10 seconds and then forcefully terminate
+                proc.terminate()
+                try:
+                    proc.wait(self.TERMINATE_WAIT_TIME)
+                except psutil.NoSuchProcess:
+                    pass
+                except psutil.TimeoutExpired:
+                    proc.kill()
+        else:
+            # Instance is not running
+            print(f"Instance {self._name} is not running")
+            instance_state = Box(name = self._name)
+
+        # Remove instance state
+        state_manager.remove(instance_state)
+        state_manager.save(conf)
 
 
     # TODO Build properties
@@ -111,10 +145,10 @@ class InstanceImpl(Command):
         conf = config.Config.load()
 
 
+    # TODO Remove instance state if stale
     def status(
             self,
     ) -> None:
-        #<><> BEGIN boiler plate logic
         # Load configuration
         conf = config.Config.load()
 
@@ -132,7 +166,6 @@ class InstanceImpl(Command):
         else:
             # Instance is not running
             print(f"Instance {self._name} is not running")
-        #<><> END boiler plate logic
         
 
     # TODO Build properties

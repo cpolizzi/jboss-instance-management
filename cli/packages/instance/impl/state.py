@@ -93,13 +93,23 @@ class InstanceStateManager:
         return result
 
 
-    # TODO Should check the process details to match: java -D[Standalone]
+    # TODO This really shouldn't be called this since it returns more than a boolean
     def is_running(
             self,
             name : str,
-    ) -> bool:
-        state = self.state_for(name)
-        return state is not None and psutil.pid_exists(state.pid)
+    ) -> psutil.Process:
+        result : psutil.Process = None
+
+        try:
+            state = self.state_for(name)
+            if state:
+                proc = psutil.Process(state.pid)
+                if proc.is_running:
+                    result = proc
+        except psutil.NoSuchProcess:
+            pass
+        
+        return result
 
 
     def update(
@@ -113,3 +123,12 @@ class InstanceStateManager:
             for i, x in enumerate(self.instances):
                 if x.name == state.name:
                     self.instances[i] = state
+
+
+    def remove(
+            self,
+            state : InstanceState,
+    ) -> None:
+        for i, x in enumerate(self.instances):
+            if x.name == state.name:
+                del self.instances[i]
