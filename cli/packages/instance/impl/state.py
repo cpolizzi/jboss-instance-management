@@ -93,6 +93,7 @@ class InstanceStateManager:
         return result
 
 
+    # TODO Should check the process details to match: java -D[Standalone]
     def is_running(
             self,
             name : str,

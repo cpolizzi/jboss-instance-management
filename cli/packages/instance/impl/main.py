@@ -7,6 +7,7 @@ import config
 import util
 
 
+# TODO Support different output formats: YAML, JSON, table
 class InstanceImpl(Command):
     _name : str
     _path : str
@@ -32,7 +33,6 @@ class InstanceImpl(Command):
         conf = config.Config.load()
 
 
-    # TODO Support different output formats: YAML, JSON, table
     # TODO Warn if instance does not actually exist on the filesystem
     # TODO Add an option for verbose to show complete configuration?
     @staticmethod
@@ -47,6 +47,7 @@ class InstanceImpl(Command):
             self,
             background: bool = False,
     ) -> None:
+        #<><> BEGIN boiler plate logic
         # Load configuration
         conf = config.Config.load()
 
@@ -60,8 +61,9 @@ class InstanceImpl(Command):
         if state_manager.is_running(self._name):
             # Instance is running, nothing more to do
             instance_state = state_manager.state_for(self._name)
-            print(f"Instance {self._name} is running and has PID {instance_state.pid}")
+            print(f"Instance {self._name} is already running and has PID {instance_state.pid}")
             return
+        #<><> END boiler plate logic
         
         # Compose JBoss properties
         self._jboss_properties = self.composeJBossProperties(conf = conf)
@@ -109,15 +111,29 @@ class InstanceImpl(Command):
         conf = config.Config.load()
 
 
-    # TODO Build properties
-    # TODO Validate instance exists in config
-    # TODO Determine instance state
-    # TODO Provide status
     def status(
             self,
     ) -> None:
+        #<><> BEGIN boiler plate logic
+        # Load configuration
         conf = config.Config.load()
 
+        # Validate instance exists
+        if not self.exists(conf):
+            raise NameError(self._name, f"Instance {self._name} does not exist")
+        
+        # Determine current instance state
+        state_manager = InstanceStateManager.load(conf)
+        instance_state : InstanceState
+        if state_manager.is_running(self._name):
+            # Instance is running
+            instance_state = state_manager.state_for(self._name)
+            print(f"Instance {self._name} is running and has PID {instance_state.pid}")
+        else:
+            # Instance is not running
+            print(f"Instance {self._name} is not running")
+        #<><> END boiler plate logic
+        
 
     # TODO Build properties
     # TODO Validate instance exists in config
