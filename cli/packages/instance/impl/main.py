@@ -134,15 +134,14 @@ class InstanceImpl(Command):
         state_manager.save(conf)
 
 
-    # TODO Build properties
-    # TODO Validate instance exists in config
-    # TODO Determine instance state
-    # TODO Restart instance
-    # TODO Update instance state
     def restart(
             self,
     ) -> None:
+        # Load configuration
         conf = config.Config.load()
+
+        self.stop()
+        self.start(background = True)
 
 
     # TODO Remove instance state if stale
