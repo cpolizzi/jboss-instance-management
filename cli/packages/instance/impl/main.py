@@ -200,6 +200,7 @@ class InstanceImpl(Command):
         state_manager.save(conf)
 
 
+    # TODO Handle 3 cases: 1) interactive; 2) non-interactive command execution; 3) non-interactive file execution
     def cli(
             self,
             command: str,
