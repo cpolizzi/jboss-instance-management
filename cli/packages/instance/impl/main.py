@@ -200,16 +200,29 @@ class InstanceImpl(Command):
         state_manager.save(conf)
 
 
-    # TODO Build properties
-    # TODO Validate instance exists in config
-    # TODO Execute CLI
     def cli(
             self,
             command: str,
             file: str,
     ) -> None:
+        # Load configuration
         conf = config.Config.load()
-        pass
+
+        # Validate instance exists
+        if not self.exists(conf):
+            raise NameError(self._name, f"Instance {self._name} does not exist")
+
+        # Compose JBoss properties
+        self._jboss_properties = self.composeJBossProperties(conf = conf)
+
+        # Compose command to execute
+        command = f"{conf.paths.jboss}/bin/jboss-cli.sh"
+        args = []
+        args = args + self._jboss_properties.compose_as_list(util.Properties.ComposeForm.CLI)
+
+        # Execute command
+        print(f"Start CLI instance {self._name}")
+        pid_or_exit_status = self.execute(command = command, args = args, debug = False, background = False)
 
 
     def exists(
