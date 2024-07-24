@@ -6,14 +6,21 @@ import yaml
 import paths
 
 
-# TODO Add to `.paths.pids` for the directory in which PID files should be stored (we need runtime status)
 class Config:
+    """
+    Represents managed instance configuration et al. Responsible for persistence of the backing YAML file for
+    the configuration.
+    """
     def __init__(
             self,
             **entries,
     ):
         """
-        Creates an instance.
+        Creates an instance from an existing dictionary such that dictionary keys are exposed as members.
+
+        ### Arguments
+        - entries
+            - Object or other iterable dictionary to dynamical;y create instance level members for.
         """
         self.__dict__.update(entries)
 
@@ -22,6 +29,9 @@ class Config:
     def schema() -> str:
         """
         Returns the absolute path to the configuration schema.
+
+        ### Returns
+        - Configuration schema path.
         """
         return f"{paths.Paths.schemas()}/config.schema.yaml"
 
@@ -30,6 +40,9 @@ class Config:
     def config() -> str:
         """
         Returns the absolute path to the configuration.
+
+        ### Returns
+        - Configuration path.
         """
         return f"{paths.Paths.configs()}/config.yaml"
 
@@ -38,6 +51,9 @@ class Config:
     def load(cls):
         """
         Loads the configuration, validates it against the configuration schema and returns the result as a dynamic object.
+
+        ### Returns
+        - Configuration with its backing data populated.
         """
         result : Config = None
 
@@ -77,6 +93,9 @@ class Config:
     ) -> None:
         """
         Saves the configuration.
+
+        ### Returns
+        - Nothing.
         """
         os.makedirs(os.path.dirname(Config.config()), exist_ok = True)
         Box(vars(self)).to_yaml(filename = self.config(), indent = 2, sort_keys = False, default_flow_style = False)

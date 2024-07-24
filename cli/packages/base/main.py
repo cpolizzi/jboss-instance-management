@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 
 
 class Command:
@@ -29,7 +30,6 @@ class Command:
             # Run command in the background, detached, and do not wait for it at all
             # args = [ command ] + args
             # result = os.spawnv(os.P_NOWAITO, command, args)
-            import subprocess
             args = [ command ] + args
             result = subprocess.Popen(args, stdout = subprocess.DEVNULL, stderr = subprocess.STDOUT, stdin = subprocess.DEVNULL).pid
  

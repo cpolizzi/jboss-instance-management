@@ -11,6 +11,15 @@ import util
 
 # TODO Support different output formats: YAML, JSON, table
 class InstanceImpl(Command):
+    """
+    Implements the Typer CLI.
+
+    - Uses a backing YAML file for the configuration which records all salient information per instance as well as global
+      defaults and critical paths.
+
+    - Uses a second backing YAML file for runtime instance state management / information such as the PID
+      (Process IDentifier) of the instance.
+    """
     _name : str
     _path : str
     _profile : str
@@ -23,17 +32,36 @@ class InstanceImpl(Command):
             self,
             name : str,
     ):
+        """
+        Creates an instace.
+
+        ### Arguments
+        - name : str
+            - Instance name.
+        """
         self._name = name
 
     def add(
             self,
     ) -> None:
+        """
+        Adds a managed instance.
+
+        ### Returns
+        - Nothing.
+        """
         conf = config.Config.load()
 
 
     def remove(
         self,
     ) -> None:
+        """
+        Removes a managed instance.
+
+        ### Returns
+        - Nothing.
+        """
         conf = config.Config.load()
 
 
@@ -41,6 +69,12 @@ class InstanceImpl(Command):
     # TODO Add an option for verbose to show complete configuration?
     @staticmethod
     def list() -> None:
+        """
+        Lists known managed instances.
+
+        ### Returns
+        - Nothing.
+        """
         conf = config.Config.load()
         if conf.instances:
             for instance in conf.instances:
@@ -51,6 +85,20 @@ class InstanceImpl(Command):
             self,
             background: bool = False,
     ) -> None:
+        """
+        Starts this managed instance.
+
+        ### Arguments
+        - background :  bool
+            - Whether or not to start the instance in the background and detached from the TTY.
+
+        ### Returns
+        - Nothing.
+
+        ### Raises
+        - NameError
+            - If the instance does not exist.
+        """
         # Load configuration
         conf = config.Config.load()
 
@@ -100,6 +148,17 @@ class InstanceImpl(Command):
     def stop(
             self,
     ) -> None:
+        """
+        Stops this managed instance. First the instance is requested to gracefully termimate and then after
+        `TERMINATE_WAIT_TIME` forcefully terminates it.
+
+        ### Returns
+        - Nothing.
+
+        ### Raises
+        - NameError
+            - If the instance does not exist.
+        """
         # Load configuration
         conf = config.Config.load()
 
@@ -137,6 +196,16 @@ class InstanceImpl(Command):
     def restart(
             self,
     ) -> None:
+        """
+        Restarts this  managed instance using the semantics described by `stop()` and `start()`.
+
+        ### Returns
+        - Nothing.
+
+        ### Raises
+        - NameError
+            - If the instance does not exist.
+        """
         # Load configuration
         conf = config.Config.load()
 
@@ -147,6 +216,16 @@ class InstanceImpl(Command):
     def status(
             self,
     ) -> None:
+        """
+        Displays the current state of this managed instance.
+
+        ### Returns
+        - Nothing.
+
+        ### Raises
+        - NameError
+            - If the instance does not exist.
+        """
         # Load configuration
         conf = config.Config.load()
 
@@ -172,6 +251,16 @@ class InstanceImpl(Command):
     def kill(
             self,
     ) -> None:
+        """
+        Forcefully stops this managed instance.
+
+        ### Returns
+        - Nothing.
+
+        ### Raises
+        - NameError
+            - If the instance does not exist.
+        """
         # Load configuration
         conf = config.Config.load()
 
@@ -206,6 +295,24 @@ class InstanceImpl(Command):
             command: str,
             file: str,
     ) -> None:
+        """
+        Executes the JBoss CLI against this managed instance. Ixf both are specified then `command` is performed first
+        and then the CLI commands contained in `file` are processed. If neither is provided then an interactive
+        session is created.
+
+        ### Arguments
+        - command : str
+            - CLI command to execute.
+        - file : str
+            - File containing CLI commands to execute.
+
+        ### Returns
+        - Nothing.
+
+        ### Raises
+        - NameError
+            - If the instance does not exist.
+        """
         # Load configuration
         conf = config.Config.load()
 
@@ -230,6 +337,16 @@ class InstanceImpl(Command):
             self,
             conf : config.Config,
     ) -> bool:
+        """
+        Returns whether or not this managed instance exists in the configuration and on the filesystem.
+
+        ### Arguments
+        - conf : config.Config
+            - Configuration file instance which serves as the source of truth for all managed instances.
+
+        ### Returns
+        - True if the managed instance exists, False otherwise.
+        """
         instance = next((x for x in conf.instances if x.name == self._name), None)
         return instance and os.path.isdir(f"{conf.paths.instances}/{self._name}")
     
@@ -238,6 +355,16 @@ class InstanceImpl(Command):
             self,
             conf : config.Config,
     ) -> util.Properties:
+       """
+       Composes JBoss and JVM properties suitable for use in managed instance lifecycle operations.
+       
+       ### Arguments
+       - conf : config.Config
+            - Configuration file instance which serves as the source of truth for all managed instances.
+
+       ### Returns
+        - A util.Properties instance based on the backing configuration for this managed instance.
+       """
        result : util.Properties = util.Properties()
 
        # Calculated defaults controlled by this tool and default configuration paths
@@ -273,6 +400,17 @@ class InstanceImpl(Command):
             self,
             conf : config.Config,
     ) -> dict:
+        """
+        Composes JBoss and JVM properties suitable for use in managed instance lifecycle operations.
+       
+        ### Arguments
+        - conf : config.Config
+             - Configuration file instance which serves as the source of truth for all managed instances.
+
+        ### Returns
+        - A util.Properties instance based on the backing configuration for this managed instance.
+        """
+        
         result : dict = dict()
 
         # Default options
