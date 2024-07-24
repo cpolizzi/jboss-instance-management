@@ -13,6 +13,4 @@ typing-extensions
 jsonschema
 psutil
 python-box
-requests
-Jinja2
 PyYAML
