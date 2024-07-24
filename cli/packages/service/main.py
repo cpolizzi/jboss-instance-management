@@ -14,6 +14,9 @@ import service.impl
 def add(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    [bold italic orange_red1]Not yet implemented[/bold italic orange_red1] Adds an instance to service orchestration.
+    """
     target = service.impl.ServiceImpl(name)
     target.add()
 
@@ -22,6 +25,9 @@ def add(
 def remove(
     name: str = typer.Argument(..., help="Instance name"),
 ):
+    """
+    [bold italic orange_red1]Not yet implemented[/bold italic orange_red1] Removes an instance to service orchestration.
+    """
     target = service.impl.ServiceImpl(name)
     target.remove()
 #-----

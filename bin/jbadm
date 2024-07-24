@@ -73,11 +73,11 @@ app.add_typer(
     )
 app.add_typer(
     service.app, name="service", 
-    help="Service management",
+    help="[bold italic orange_red1]Not yet implemented[/bold italic orange_red1] Service management",
     )
 app.add_typer(
     expression.app, name="expression", 
-    help="Expression management",
+    help="[bold italic orange_red1]Not yet implemented[/bold italic orange_red1] Expression management",
     )
 #-----
 
