@@ -12,6 +12,7 @@ import util
 
 
 # TODO Support different output formats: YAML, JSON, table
+# TODO Replace throwing exceptions with proper exiting and error messages.
 class InstanceImpl(Command):
     """
     Implements the Typer CLI.
@@ -55,6 +56,7 @@ class InstanceImpl(Command):
         ### Returns
         - Nothing.
         """
+        # Load configuration
         conf = config.Config.load()
 
         # Check if instance already exists
@@ -95,7 +97,30 @@ class InstanceImpl(Command):
         ### Returns
         - Nothing.
         """
+        # Load configuration
         conf = config.Config.load()
+
+        # Validate instance exists
+        if not self.exists(conf):
+            raise NameError(self._name, f"Instance {self._name} does not exist")
+        
+        # Determine current instance state
+        state_manager = InstanceStateManager.load(conf)
+        instance_state : InstanceState
+        if state_manager.is_running(self._name):
+            # Instance is running, nothing more to do
+            instance_state = state_manager.state_for(self._name)
+            print(f"Instance {self._name} is running, please stop the instance first")
+            return
+
+        # Remove instance from file system
+        shutil.rmtree(path = f"{conf.paths.instances}/{self._name}")
+
+        # Update and save configuration
+        for i, x in enumerate(conf.instances):
+            if x.name == self._name:
+                del conf.instances[i]
+        conf.save()
 
 
     # TODO Warn if instance does not actually exist on the filesystem
