@@ -1,6 +1,8 @@
 from box import Box
+import fnmatch
 import os
 import psutil
+import shutil
 import time
 
 from base import *
@@ -41,6 +43,9 @@ class InstanceImpl(Command):
         """
         self._name = name
 
+
+    # TODO Consider adding support for providing Java properties to add to the configuration for the instance.
+    # TODO Consider adding support for providing JVM options to add to the configuration for the instance.
     def add(
             self,
     ) -> None:
@@ -51,6 +56,34 @@ class InstanceImpl(Command):
         - Nothing.
         """
         conf = config.Config.load()
+
+        # Check if instance already exists
+        if self.exists(conf):
+            raise NameError(self._name, f"Instance {self._name} already exists")
+
+        # Copy assets from base install
+        src_path = f"{conf.paths.jboss}/standalone"
+        dst_path = f"{conf.paths.instances}/{self._name}"
+
+        self.src_path = src_path
+        self.allowed = [
+            f"configuration",
+            f"configuration/*.properties",
+            f"configuration/{conf.defaults.jboss.profile}",
+            f"deployments",
+        ]
+        shutil.copytree(
+            src = src_path,
+            dst = dst_path,
+            ignore = self.filter_paths,
+        )
+        del(self.src_path)
+        del(self.allowed)
+
+        # Update and save configuration
+        instance = Box(name = self._name)
+        conf.instances.append(instance)
+        conf.save()
 
 
     def remove(
@@ -427,5 +460,44 @@ class InstanceImpl(Command):
                 result[k] = v
         except KeyError:
             pass
+
+        return result
+
+
+    def filter_paths(
+            self,
+            dir : str,
+            dir_contents : list,
+    ) -> list:
+        """
+        Filters a directory contents based on a set of patterns. This must be used specifically with
+        `shutil.copytree()`.
+
+        This requires that the following attributes are present in the object instance:
+        - src_path : str
+            - Top-level directory that is being recursively filtered.
+        - allowed : list[str]
+            - List of glob patterns, relative to `src_path`, to allow; e.g., not exclude from `shutil.copytree()`.
+
+        ### Arguments
+        - dir : str
+            - Directory path to filter.
+        - dir_contents : list[str]
+            - Directory contents (just the base names).
+
+        ### Returns
+        - List of base names to be ignored / excluded where each item is a string.
+        """
+        result = []
+
+        paths = [ f"{dir}/" + s for s in dir_contents ]
+        paths = [ s.removeprefix(f"{self.src_path}/") for s in paths ]
+        allowed = []
+        for pattern in self.allowed:
+            matches = fnmatch.filter(names = paths, pat = pattern)
+            if matches:
+                allowed = allowed + matches
+        ignored = list(set(paths) - set(allowed))
+        result = [ s.removeprefix(f"{os.path.dirname(s)}/") for s in ignored ]
 
         return result
