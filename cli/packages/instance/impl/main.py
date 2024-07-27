@@ -1,9 +1,14 @@
 from box import Box
+from rich import print as rprint
+from rich.console import Console
+from rich.table import Table
 import fnmatch
+import json
 import os
 import psutil
 import shutil
 import time
+import yaml
 
 from base import *
 from .state import InstanceStateManager, InstanceState
@@ -123,8 +128,6 @@ class InstanceImpl(Command):
         conf.save()
 
 
-    # TODO Warn if instance does not actually exist on the filesystem
-    # TODO Add an option for verbose to show complete configuration?
     @staticmethod
     def list() -> None:
         """
@@ -133,11 +136,47 @@ class InstanceImpl(Command):
         ### Returns
         - Nothing.
         """
+        # Load configuration and state manager
         conf = config.Config.load()
-        if conf.instances:
-            for instance in conf.instances:
-                print(f"{instance.name}")
+        state_manager = InstanceStateManager.load(conf)
 
+        # Gather instances information
+        result = []
+        for instance in conf.instances:
+            state = state_manager.state_for(instance.name)
+            instance_info = Box(name = instance.name, status = "Not Running")
+            instance_info.setdefault("pid", "n/a")
+            if state is not None:
+                instance_info.status = "Running"
+                instance_info.pid = state.pid
+            result.append(instance_info.to_dict())
+
+        # Output information in desired format
+        format = util.OutputFormat.TABLE
+        if format == util.OutputFormat.JSON:
+            rprint(json.dumps(result, indent = 4, sort_keys = True))
+        elif format == util.OutputFormat.YAML:
+            rprint(yaml.dump(result, indent = 4, sort_keys = True))
+        elif format == util.OutputFormat.TABLE:
+            console = Console()
+            table = Table(show_lines = True)
+            table.add_column("Name", style = "green")
+            table.add_column("PID", style = "gray93")
+            table.add_column("Status", style = "yellow")
+            for instance in result:
+                instance = Box(instance)
+                row = [ instance.name, str(instance.pid), instance.status ]
+                table.add_row(instance.name, str(instance.pid), instance.status)
+            console.print(table)
+        elif format == util.OutputFormat.TEXT:
+            for instance in result:
+                instance = Box(instance)
+                print(f"Name: {instance.name}")
+                print(f"PID: {instance.pid}")
+                print(f"Status: {instance.status}")
+                print()
+        else:
+            raise ValueError("Unknown output format")
 
     def start(
             self,
